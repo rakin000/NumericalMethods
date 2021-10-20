@@ -1,6 +1,14 @@
+"""
+Created on Sat Jul  3 10:58:32 2021
+
+@author: SlaughterHouse
+"""
 import math
+import matplotlib.pyplot as plt
 import numpy as np
-import sympy
+import sympy 
+
+
 # gaussian elimination with partial pivoting 
 def GaussianElimination(A,B,d=True):
     n = np.size(A,axis=0)
@@ -45,16 +53,22 @@ def linear_regression(x,y,special=False):
         print("Invalid Argument: incompatible length.")
         return 
     n = len(x)
-    sum_x = sum([x[i] for i in range(n)])
-    sum_y = sum([y[i] for i in range(n)])
-    sum_x_x = sum([ x[i]*x[i] for i in range(n)])
-    sum_x_y = sum([x[i]*y[i] for i in range(n)])
+    sum_x = 0
+    sum_y = 0
+    sum_x_sq = 0
+    sum_x_y = 0;
+    
+    for i in range(n):
+        sum_x += x[i]
+        sum_y += y[i]
+        sum_x_sq += x[i]*x[i]
+        sum_x_y += x[i]*y[i]
     
     if special == True:
-        a1 = sum_x_y/sum_x_x
+        a1 = sum_x_y/sum_x_sq
         return a1
-    a1 = (n*sum_x_y-sum_x*sum_y)/(n*sum_x_x-sum_x*sum_x)
-    a0 = (sum_y*sum_x_x-sum_x*sum_x_y)/(n*sum_x_x-sum_x*sum_x)
+    a1 = (n*sum_x_y-sum_x*sum_y)/(n*sum_x_sq-sum_x*sum_x)
+    a0 = (sum_y*sum_x_sq-sum_x*sum_x_y)/(n*sum_x_sq-sum_x*sum_x)
     return a0,a1
 
 def non_linear_regression_exponential_form(x,y):
@@ -63,14 +77,19 @@ def non_linear_regression_exponential_form(x,y):
         return
 
     n = len(x)
-    sum_x = sum([x[i] for i in range(n)])
-    sum_lny = sum([math.log(y[i]) for i in range(n)])
-    sum_x_x = sum([x[i]*x[i] for i in range(n)])
-    sum_x_lny = sum([x[i]*math.log(y[i]) for i in range(n)])
+    sum_x = 0
+    sum_lny = 0
+    sum_x_sq = 0
+    sum_x_lny = 0
     
+    for i in range(n):
+        sum_x += x[i]
+        sum_lny += math.log(y[i])
+        sum_x_sq += x[i]*x[i]
+        sum_x_lny += x[i]*math.log(y[i])
         
-    a1 = (n*sum_x_lny-sum_x*sum_lny)/(n*sum_x_x-sum_x*sum_x)
-    a0 = (sum_lny*sum_x_x-sum_x*sum_x_lny)/(n*sum_x_x-sum_x*sum_x)
+    a1 = (n*sum_x_lny-sum_x*sum_lny)/(n*sum_x_sq-sum_x*sum_x)
+    a0 = (sum_lny*sum_x_sq-sum_x*sum_x_lny)/(n*sum_x_sq-sum_x*sum_x)
     a0 = math.e ** a0
     return a0,a1
 
@@ -129,29 +148,21 @@ def non_linear_power_regression(x,y):
     b = a1
     return a,b
 
-def __main__():
-    x = [2.0,3.0,2.0,3.0]
-    y = [4.0,6.0,6.0,8.0]
+
+
     
-    theta = [0.69,0.96,1.13,1.57,1.91]
-    T = [0.188,0.209,0.230,0.250,0.313]
-    
-    eps = [0,0.183,0.36,0.5324,0.702,0.867,1.0244,1.1774,1.329,1.479,1.5,1.56]
-    stress = [0,306,612,917,1223,1529,1835,2140,2446,2752,2767,2896]
-    
-   ## a1 = linear_regression(eps,stress,True)
-    t = [0,1,3,5,7,9]
-    gamma = [1,0.891,0.708,0.562,0.447,0.355]
-    a0,a1 = non_linear_regression_exponential_form(t,gamma)
-    x_var = sympy.Symbol('x')
-    a_var = sympy.Symbol('a')
-    b_var = sympy.Symbol('b')
-    
-    expr = a_var*sympy.exp(b_var*x_var)
-    print(expr.evalf(subs={x_var:24,a_var:a0,b_var:a1}))
-    temperature = [80,40,-40,-120,-200,-280,-340]
-    coeff_thermal_exp = [6.47e-6,6.24e-6,5.72e-6,5.09e-6,4.30e-6,3.33e-6,2.45e-6]
-   ## a = non_linear_polynomial_regression(temperature,coeff_thermal_exp,2)
-   ## print(a)
-    
-__main__()
+
+data = open("data.txt","r").readlines()
+x = []
+y = [] 
+for line in data:
+    inp=line.split()
+    x.append(float(inp[0]))
+    y.append(float(inp[1]))
+
+a0,a1 = linear_regression(x,y)
+y1 = [a0+a1*xx for xx in x]
+plot1 = plt
+plot1.scatter(x,y)
+plot1.plot(x,y1,color='red')
+plot1.show()
